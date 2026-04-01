@@ -149,11 +149,23 @@
         }
 
         .header-center {
-            position: absolute;
+            position: fixed;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
             white-space: nowrap;
             text-align: center;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.8s ease 0.3s;
+            pointer-events: none;
+        }
+
+        .header-center.visible {
+            opacity: 1;
         }
 
         .header-right {
@@ -452,19 +464,14 @@
             }
 
             .header-center {
-                position: fixed;
+                top: auto;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                top: auto;
+                height: auto;
                 transform: none;
-                order: 3;
-                flex-basis: 100%;
                 white-space: normal;
-                margin-top: 0;
-                text-align: center;
                 padding: 20px 24px;
-                z-index: 50;
             }
 
             .header-logo span {
@@ -528,10 +535,6 @@
                 padding: 20px 24px;
             }
 
-            .header-center {
-                position: fixed;
-            }
-
             .panel-overlay {
                 position: fixed;
                 padding: var(--header-h) 16px 30px;
@@ -576,7 +579,7 @@
 
     <!-- Video Background -->
     <div class="video-wrap">
-        <video id="js-video" autoplay muted loop playsinline>
+        <video id="js-video" autoplay muted loop playsinline webkit-playsinline>
             <source src="bgvid.mp4" type="video/mp4">
         </video>
     </div>
@@ -589,13 +592,15 @@
                 <span>torrey labs</span>
             </a>
         </div>
-        <div class="header-center">
-            <h1 class="header-tagline">AI for businesses with a front door</h1>
-        </div>
         <div class="header-right">
             <a class="header-nav-link" id="js-about-btn">about us</a>
         </div>
     </header>
+
+    <!-- Tagline (outside header so position:fixed works on mobile) -->
+    <div class="header-center" id="js-tagline">
+        <h1 class="header-tagline">AI for businesses with a front door</h1>
+    </div>
 
     <!-- Content Panel -->
     <div class="panel-overlay" id="js-panel">
@@ -674,6 +679,7 @@
             const video = document.getElementById('js-video');
             const loader = document.getElementById('js-loader');
             const header = document.getElementById('js-header');
+            const tagline = document.getElementById('js-tagline');
             const aboutBtn = document.getElementById('js-about-btn');
             const panel = document.getElementById('js-panel');
             const card = document.getElementById('js-card');
@@ -685,10 +691,14 @@
                 video.classList.add('loaded');
                 loader.classList.add('done');
                 header.classList.add('visible');
+                tagline.classList.add('visible');
             }
 
             /* Force autoplay on mobile — muted+playsinline allows it */
             function tryPlay() {
+                video.muted = true;
+                video.setAttribute('playsinline', '');
+                video.setAttribute('webkit-playsinline', '');
                 var p = video.play();
                 if (p && p.catch) p.catch(function () { });
             }
@@ -697,8 +707,8 @@
                 tryPlay();
                 reveal();
             } else {
+                video.addEventListener('loadeddata', function () { tryPlay(); }, { once: true });
                 video.addEventListener('canplaythrough', function () { tryPlay(); reveal(); }, { once: true });
-                /* Also try playing as soon as metadata loads (faster on mobile) */
                 video.addEventListener('loadedmetadata', function () { tryPlay(); }, { once: true });
                 setTimeout(function () { tryPlay(); reveal(); }, 4000);
             }
