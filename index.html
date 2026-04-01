@@ -452,12 +452,65 @@
             }
 
             .header-center {
-                position: static;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
                 transform: none;
                 order: 3;
                 flex-basis: 100%;
                 white-space: normal;
+                margin-top: 0;
+                text-align: center;
+                padding: 20px 24px;
+                z-index: 50;
+            }
+
+            .header-logo span {
+                font-size: 20px;
+            }
+
+            .header-logo img {
+                width: 80px;
+                height: 80px;
                 margin-top: 10px;
+            }
+
+            .header-tagline {
+                font-size: 20px;
+            }
+
+            .header-nav-link {
+                font-size: 20px;
+            }
+
+            .section-title {
+                font-size: 17px;
+            }
+
+            .section-text {
+                font-size: 14px;
+            }
+
+            .entry-title {
+                font-size: 14px;
+            }
+
+            .entry-body {
+                font-size: 14px;
+            }
+
+            .entry-body li {
+                font-size: 14px;
+            }
+
+            .tab-btn {
+                font-size: 14px;
+            }
+
+            .card-foot {
+                font-size: 13px;
             }
         }
 
@@ -473,6 +526,10 @@
                 position: relative;
                 height: auto;
                 padding: 20px 24px;
+            }
+
+            .header-center {
+                position: fixed;
             }
 
             .panel-overlay {
@@ -630,11 +687,20 @@
                 header.classList.add('visible');
             }
 
+            /* Force autoplay on mobile — muted+playsinline allows it */
+            function tryPlay() {
+                var p = video.play();
+                if (p && p.catch) p.catch(function () { });
+            }
+
             if (video.readyState >= 3) {
+                tryPlay();
                 reveal();
             } else {
-                video.addEventListener('canplaythrough', reveal, { once: true });
-                setTimeout(reveal, 4000);
+                video.addEventListener('canplaythrough', function () { tryPlay(); reveal(); }, { once: true });
+                /* Also try playing as soon as metadata loads (faster on mobile) */
+                video.addEventListener('loadedmetadata', function () { tryPlay(); }, { once: true });
+                setTimeout(function () { tryPlay(); reveal(); }, 4000);
             }
 
             /* ── Panel toggle ── */
